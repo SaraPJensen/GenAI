@@ -1,0 +1,52 @@
+{
+    "tables": {
+        "table": {
+            "columns": {
+                "alcohol": {
+                    "sdtype": "numerical"
+                },
+                "malic_acid": {
+                    "sdtype": "numerical"
+                },
+                "ash": {
+                    "sdtype": "numerical"
+                },
+                "alcalinity_of_ash": {
+                    "sdtype": "numerical"
+                },
+                "magnesium": {
+                    "sdtype": "numerical"
+                },
+                "total_phenols": {
+                    "sdtype": "numerical"
+                },
+                "flavanoids": {
+                    "sdtype": "numerical"
+                },
+                "nonflavanoid_phenols": {
+                    "sdtype": "numerical"
+                },
+                "proanthocyanins": {
+                    "sdtype": "numerical"
+                },
+                "color_intensity": {
+                    "sdtype": "numerical"
+                },
+                "hue": {
+                    "sdtype": "numerical"
+                },
+                "od280/od315_of_diluted_wines": {
+                    "sdtype": "numerical"
+                },
+                "proline": {
+                    "sdtype": "numerical"
+                },
+                "target": {
+                    "sdtype": "categorical"
+                }
+            }
+        }
+    },
+    "relationships": [],
+    "METADATA_SPEC_VERSION": "V1"
+}

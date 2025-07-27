@@ -2,8 +2,8 @@ from sdv.single_table import CTGANSynthesizer
 from sdv.metadata import Metadata
 import pandas as pd
 
-real_data = pd.read_csv('datasets/real_cancer_data.csv')
-metadata = Metadata.load_from_json('datasets/cancer_metadata.json')
+real_data = pd.read_csv('../datasets/real_cancer_data.csv')
+metadata = Metadata.load_from_json('../datasets/cancer_metadata.json')
 
 # Step 1: Create the synthesizer
 synthesizer = CTGANSynthesizer(
@@ -19,14 +19,14 @@ synthesizer.fit(real_data)
 
 # Get and save loss progress
 progress = synthesizer.get_loss_values()
-progress.to_csv('loss_progress/ctgan_loss.csv')
+progress.to_csv('loss_progress/ctgan_loss.csv', index = False)
 
 #Save model
 synthesizer.save('saved_models/ctgan.pkl')
 
 # Generate synthetic data
 synthetic_data = synthesizer.sample(num_rows=1000)
-synthetic_data.to_csv('datasets/ctgan_data.csv', index = False)
+synthetic_data.to_csv('../datasets/ctgan_data.csv', index = False)
 
 '''
 # Generate loss figure
