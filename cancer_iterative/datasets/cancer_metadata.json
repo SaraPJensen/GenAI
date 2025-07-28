@@ -1,0 +1,103 @@
+{
+    "tables": {
+        "table": {
+            "columns": {
+                "mean radius": {
+                    "sdtype": "numerical"
+                },
+                "mean texture": {
+                    "sdtype": "numerical"
+                },
+                "mean perimeter": {
+                    "sdtype": "numerical"
+                },
+                "mean area": {
+                    "sdtype": "numerical"
+                },
+                "mean smoothness": {
+                    "sdtype": "numerical"
+                },
+                "mean compactness": {
+                    "sdtype": "numerical"
+                },
+                "mean concavity": {
+                    "sdtype": "numerical"
+                },
+                "mean concave points": {
+                    "sdtype": "numerical"
+                },
+                "mean symmetry": {
+                    "sdtype": "numerical"
+                },
+                "mean fractal dimension": {
+                    "sdtype": "numerical"
+                },
+                "radius error": {
+                    "sdtype": "numerical"
+                },
+                "texture error": {
+                    "sdtype": "numerical"
+                },
+                "perimeter error": {
+                    "sdtype": "numerical"
+                },
+                "area error": {
+                    "sdtype": "numerical"
+                },
+                "smoothness error": {
+                    "sdtype": "numerical"
+                },
+                "compactness error": {
+                    "sdtype": "numerical"
+                },
+                "concavity error": {
+                    "sdtype": "numerical"
+                },
+                "concave points error": {
+                    "sdtype": "numerical"
+                },
+                "symmetry error": {
+                    "sdtype": "numerical"
+                },
+                "fractal dimension error": {
+                    "sdtype": "numerical"
+                },
+                "worst radius": {
+                    "sdtype": "numerical"
+                },
+                "worst texture": {
+                    "sdtype": "numerical"
+                },
+                "worst perimeter": {
+                    "sdtype": "numerical"
+                },
+                "worst area": {
+                    "sdtype": "numerical"
+                },
+                "worst smoothness": {
+                    "sdtype": "numerical"
+                },
+                "worst compactness": {
+                    "sdtype": "numerical"
+                },
+                "worst concavity": {
+                    "sdtype": "numerical"
+                },
+                "worst concave points": {
+                    "sdtype": "numerical"
+                },
+                "worst symmetry": {
+                    "sdtype": "numerical"
+                },
+                "worst fractal dimension": {
+                    "sdtype": "numerical"
+                },
+                "target": {
+                    "sdtype": "categorical"
+                }
+            }
+        }
+    },
+    "relationships": [],
+    "METADATA_SPEC_VERSION": "V1"
+}
