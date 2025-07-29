@@ -4,7 +4,7 @@ import os
 from sdv.metadata import Metadata
 
 
-def make_cancer_data(percentage_train):
+def make_cancer_data():
 
     data = load_breast_cancer(as_frame = True)
     df = data.frame  #Include targets as last column: 0 = malignant, 1 = benign
@@ -14,7 +14,7 @@ def make_cancer_data(percentage_train):
     #Save as csv
     os.makedirs('../datasets', exist_ok = True)
 
-    df.to_csv('../datasets/real_cancer_data.csv', index = False)
+    df_shuffled.to_csv('../datasets/real_cancer_data.csv', index = False)
 
 
     clean_df = pd.read_csv('../datasets/real_cancer_data.csv') #Make metadata on the dataframe without indices

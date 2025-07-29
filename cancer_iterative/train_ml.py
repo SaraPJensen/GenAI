@@ -56,9 +56,8 @@ class MLP(nn.Module):
 
 def train_model(datatype, percentage):
 
-
     # Training loop with validation
-    num_epochs = 10
+    num_epochs = 50
     train_losses = []
     train_accuracy = []
     test_losses = []
@@ -83,12 +82,7 @@ def train_model(datatype, percentage):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = MLP(input_dim=input_shape).to(device)
 
-    _, _, train_loader, test_loader = get_dataloader(datatype, percentage)
-
-    _, _, _, real_test_loader = get_dataloader('real', percentage)
-
-    _, complete_loader = get_dataloader('real_complete', percentage)
-
+    train_loader, test_loader, real_test_loader, complete_loader = dataset_and_loader(datatype, percentage)
 
     # Loss and optimizer
     criterion = nn.BCELoss()
@@ -146,7 +140,7 @@ def train_model(datatype, percentage):
                 accuracy = correct / targets.size(0)
                 running_test_accuracy += accuracy.item()
 
-                print('correct from test loader', correct)
+                #print('correct from test loader', correct)
 
 
             for inputs, targets in real_test_loader:
@@ -172,7 +166,7 @@ def train_model(datatype, percentage):
                 accuracy = correct / targets.size(0)
                 running_complete_test_accuracy += accuracy.item()
 
-                print('correct from complete loader', correct)
+                #print('correct from complete loader', correct)
 
 
         avg_test_loss = running_test_loss / len(test_loader)
@@ -206,11 +200,9 @@ def train_model(datatype, percentage):
 datatypes = ['real', 'gaussian', 'ctgan', 'tvae', 'copula']
 percentages = range(10, 100, 10)
 
-train_model('real', 10)
 
-exit()
 
-for p in range(10, 30, 10): 
+for p in range(10, 100, 10): 
     for datatype in datatypes: 
 
         print('Datatype: ', datatype)

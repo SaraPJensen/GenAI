@@ -7,14 +7,13 @@ torch.manual_seed(1)
 
 
 class CompleteDataset(Dataset):
-    def __init__(self):
+    def __init__(self, scaler):
         self.data = pd.read_csv('datasets/real_cancer_data.csv')
 
         self.inputs = torch.tensor(self.data.iloc[:, :-1].values)
         self.targets = torch.tensor(self.data.iloc[:, -1].values)
 
-        scaler = StandardScaler()
-        self.inputs = torch.from_numpy(scaler.fit_transform(self.inputs))
+        self.inputs = torch.from_numpy(scaler.transform(self.inputs))
 
     def __len__(self):
         return len(self.data)
@@ -28,11 +27,11 @@ class CompleteDataset(Dataset):
 
 
 
-class Cancer_Dataset(Dataset):
-    def __init__(self, datatype, percentage):
+class CancerDataset(Dataset):
+    def __init__(self, datatype, percentage, scaler = None):
         self.datatype = datatype
 
-        if self.datatype == 'real' or self.datatype == 'real_complete':
+        if self.datatype == 'real':
             self.filepath = 'datasets/real_cancer_data.csv'
 
         elif self.datatype == 'gaussian' or self.datatype == 'ctgan' or self.datatype == 'copula' or self.datatype == 'tvae':
@@ -47,15 +46,17 @@ class Cancer_Dataset(Dataset):
         self.inputs = torch.tensor(self.data.iloc[:, :-1].values)
         self.targets = torch.tensor(self.data.iloc[:, -1].values)
 
+        if scaler is not None:
+            self.inputs = torch.from_numpy(scaler.transform(self.inputs))
 
-    def fit_transform_scaling(self, training_data, scaler = None):
+
+    def fit_transform_scaling(self, training_data):
         inputs, _ = training_data[:]
         scaler = StandardScaler()
-
-        if scaler is None: 
-            scaled_training_data = scaler.fit(inputs)
+        scaled_training_data = scaler.fit(inputs)
 
         self.inputs = torch.from_numpy(scaler.transform(self.inputs))
+        return scaler
 
     def __len__(self):
         return len(self.data)
@@ -83,28 +84,36 @@ def complete_dataset_loader():
 
 def dataset_and_loader(datatype, percentage):
 
-    dataset = Cancer_Dataset(datatype, percentage)
+    dataset = CancerDataset(datatype, percentage)
     total_size = len(dataset)
 
     # Split sizes
     if datatype == 'real':
         train_size = int(percentage/100 * total_size)
-        test_size = total_size - train_size
 
         train_dataset = Subset(dataset, list(range(train_size)))
         test_dataset = Subset(dataset, list(range(train_size, len(dataset))))
 
-        
+
     else: 
         train_size = int(0.7 * total_size)
         test_size = total_size - train_size # ensures full coverage
         train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
+    scaler = dataset.fit_transform_scaling(train_dataset)
 
-    dataset.fit_transform_scaling(train_dataset)
+    complete_dataset = CompleteDataset(scaler)  #Scale complete dataset according to same scaler
+
+    real_dataset = CancerDataset('real', percentage, scaler)  #Scale real dataset according to same scaler
+    real_dataset_size = len(real_dataset)
+    real_train_size = int((percentage/100) * real_dataset_size)
+    real_test_dataset = Subset(real_dataset, list(range(real_train_size, real_dataset_size)))
 
     # print('train dataset size: ', len(train_dataset[:][0]))
-    # print('test dataset size: ', len(test_dataset[:][0]))
+    # print('real_train_size', real_train_size)
+    # print('test dataset size: ', len(real_test_dataset[:][0]))
+    # print("complete dataset size: ", len(complete_dataset))
+    # exit()
 
     train_loader = DataLoader(train_dataset,
                         batch_size = 8,
@@ -120,10 +129,24 @@ def dataset_and_loader(datatype, percentage):
                         drop_last = True
                         )
 
+    real_test_loader = DataLoader(real_test_dataset,
+                        batch_size = 8,
+                        shuffle = True,
+                        num_workers = 4,
+                        drop_last = True
+                        )
+    
+    complete_loader = DataLoader(complete_dataset,
+                        batch_size = 8,
+                        shuffle = True,
+                        num_workers = 4,
+                        drop_last = True
+                        )
+
     # print("len train_loader", len(train_loader))
     # print("len test_loader", len(test_loader))
 
-    return train_dataset, test_dataset, train_loader, test_loader
+    return train_loader, test_loader, real_test_loader, complete_loader
 
 
 def combined_dataloader(train_dataset1, test_dataset1, train_dataset2, test_dataset2):
