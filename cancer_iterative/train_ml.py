@@ -1,4 +1,4 @@
-from dataloaders import dataset_and_loader, combined_dataloader, complete_dataset_loader
+from dataloaders import dataset_and_loader, combined_dataloader
 import torch
 import pandas as pd
 import torch.nn as nn
@@ -6,32 +6,6 @@ from tqdm import tqdm
 import os
 
 torch.manual_seed(1)
-
-
-def get_dataloader(datatype, percentage):
-        if datatype == 'real':
-            real_train_dataset, real_test_dataset, real_train_loader, real_test_loader = dataset_and_loader('real', percentage)
-            return real_train_dataset, real_test_dataset, real_train_loader, real_test_loader
-
-        if datatype == 'real_complete':
-            complete_dataset, complete_loader = complete_dataset_loader()
-            return complete_dataset, complete_loader 
-
-        elif datatype == 'gaussian':
-            gaussian_train_dataset, gaussian_test_dataset, gaussian_train_loader, gaussian_test_loader = dataset_and_loader('gaussian', percentage)
-            return gaussian_train_dataset, gaussian_test_dataset, gaussian_train_loader, gaussian_test_loader 
-
-        elif datatype == 'ctgan':
-            ctgan_train_dataset, ctgan_test_dataset, ctgan_train_loader, ctgan_test_loader = dataset_and_loader('ctgan', percentage)
-            return ctgan_train_dataset, ctgan_test_dataset, ctgan_train_loader, ctgan_test_loader 
-
-        elif datatype == 'copula':
-            copula_train_dataset, copula_test_dataset, copula_train_loader, copula_test_loader = dataset_and_loader('copula', percentage)
-            return copula_train_dataset, copula_test_dataset, copula_train_loader, copula_test_loader 
-
-        elif datatype == 'tvae':
-            tvae_train_dataset, tvae_test_dataset, tvae_train_loader, tvae_test_loader = dataset_and_loader('tvae', percentage)
-            return tvae_train_dataset, tvae_test_dataset, tvae_train_loader, tvae_test_loader
 
 
 
@@ -54,7 +28,7 @@ class MLP(nn.Module):
         return self.net(x)
 
 
-def train_model(datatype, percentage):
+def train_model(datatype, percentage, combined = False):
 
     # Training loop with validation
     num_epochs = 50
@@ -70,10 +44,15 @@ def train_model(datatype, percentage):
     input_shape = 30
     learning_rate = 0.001
 
-    progress_file_path = f'training_progress/{percentage}_train/{datatype}_progress.csv' 
-
     os.makedirs(f'training_progress/{percentage}_train', exist_ok=True)
     os.makedirs(f'cancer_models/{percentage}_train', exist_ok=True) 
+
+    if combined:
+        progress_file_path = f'training_progress/{percentage}_train/{datatype}_combined_progress.csv' 
+
+    else:
+        progress_file_path = f'training_progress/{percentage}_train/{datatype}_progress.csv' 
+
 
     with open(progress_file_path, "w") as file:
         file.write('epoch,training_loss,train_accuracy,test_loss,test_accuracy,real_test_loss,real_test_accuracy,real_complete_loss,real_complete_accuracy\n')
@@ -82,7 +61,11 @@ def train_model(datatype, percentage):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = MLP(input_dim=input_shape).to(device)
 
-    train_loader, test_loader, real_test_loader, complete_loader = dataset_and_loader(datatype, percentage)
+    if combined:
+        train_loader, test_loader, real_test_loader, complete_loader = combined_dataloader(datatype, percentage)
+
+    else:
+        train_loader, test_loader, real_test_loader, complete_loader = dataset_and_loader(datatype, percentage)
 
     # Loss and optimizer
     criterion = nn.BCELoss()
@@ -194,13 +177,27 @@ def train_model(datatype, percentage):
         file.close()
 
 
-    torch.save(model.state_dict(), f'cancer_models/{percentage}_train/{datatype}_final_model.pt')
+    if combined:
+        torch.save(model.state_dict(), f'cancer_models/{percentage}_train/{datatype}_combined_final_model.pt')
+
+    else:
+        torch.save(model.state_dict(), f'cancer_models/{percentage}_train/{datatype}_final_model.pt')
 
 
 datatypes = ['real', 'gaussian', 'ctgan', 'tvae', 'copula']
+combined_datatypes = ['gaussian', 'ctgan', 'tvae', 'copula']
 percentages = range(10, 100, 10)
 
 
+for p in range(10, 100, 10): 
+    for datatype in combined_datatypes: 
+
+        print('Datatype: ', datatype)
+        print('Percentage: ', p)
+
+        train_model(datatype, p, combined = True)
+
+exit()
 
 for p in range(10, 100, 10): 
     for datatype in datatypes: 
