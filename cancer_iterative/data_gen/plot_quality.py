@@ -35,7 +35,10 @@ def plot_complete_col_shape():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'quality_reports/complete_col_shapes.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('quality_reports/complete_col_shapes.png', "wb") as f:
+        f.write(img_bytes)
+
 
 
 def plot_complete_col_trends():
@@ -71,7 +74,10 @@ def plot_complete_col_trends():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'quality_reports/complete_col_trends.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('quality_reports/complete_col_trends.png', "wb") as f:
+        f.write(img_bytes)
+
 
 
 def plot_test_col_shape():
@@ -107,7 +113,10 @@ def plot_test_col_shape():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'quality_reports/test_col_shapes.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('quality_reports/test_col_shapes.png', "wb") as f:
+        f.write(img_bytes)
+
 
 
 def plot_test_col_trends():
@@ -143,12 +152,14 @@ def plot_test_col_trends():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'quality_reports/test_col_trends.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('quality_reports/test_col_trends.png', "wb") as f:
+        f.write(img_bytes)
 
 
 
-#plot_complete_col_shape()
-#plot_complete_col_trends()
+plot_complete_col_shape()
+plot_complete_col_trends()
 
 plot_test_col_shape()
 plot_test_col_trends()

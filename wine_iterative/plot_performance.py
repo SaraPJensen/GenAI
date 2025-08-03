@@ -38,7 +38,9 @@ def plot_final_real_test_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/real_test_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open(f'training_progress/real_test_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 def plot_final_real_complete_acc():
@@ -76,8 +78,9 @@ def plot_final_real_complete_acc():
                                 font = dict(size=22)),
                             font=dict(size=20)))
     
-
-    fig.write_image(f'training_progress/real_complete_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open(f'training_progress/real_complete_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 
@@ -117,7 +120,9 @@ def plot_final_test_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/test_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('training_progress/test_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 def plot_final_training_acc():
@@ -156,14 +161,16 @@ def plot_final_training_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/training_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('training_progress/training_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 
-#plot_final_real_test_acc()
-# plot_final_test_acc()
-# plot_final_training_acc()
-# plot_final_real_complete_acc()
+plot_final_real_test_acc()
+plot_final_test_acc()
+plot_final_training_acc()
+plot_final_real_complete_acc()
 
 
 
@@ -209,7 +216,9 @@ def plot_final_combined_real_test_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/real_test_combined_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('training_progress/real_test_combined_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 def plot_final_combined_real_complete_acc():
@@ -251,7 +260,9 @@ def plot_final_combined_real_complete_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/real_complete_combined_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('training_progress/real_complete_combined_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 
@@ -295,7 +306,9 @@ def plot_final_combined_test_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/test_combined_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('training_progress/test_combined_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 def plot_final_combined_training_acc():
@@ -338,7 +351,9 @@ def plot_final_combined_training_acc():
                             font=dict(size=20)))
     
 
-    fig.write_image(f'training_progress/training_combined_final_acc.pdf')
+    img_bytes = fig.to_image(format="png", scale=3)
+    with open('training_progress/training_combined_final_acc.png', "wb") as f:
+        f.write(img_bytes)
 
 
 plot_final_combined_real_test_acc()
