@@ -1,6 +1,11 @@
 # Project related stuff
 pendulum/real_data/
 pendulum/synthetic_data/
+pendulum/synthetic_data/dgan/
+pendulum/synthetic_data/dgan/dgan_scaling/
+pendulum/synthetic_data/dgan/prescaled/
+pendulum/synthetic_data/dgan/wrapped/
+pendulum/synthetic_data/timegan/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
