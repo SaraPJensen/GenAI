@@ -1,5 +1,6 @@
 # Project related stuff
 pendulum/real_data/
+pendulum/synthetic_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
