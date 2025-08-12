@@ -41,7 +41,7 @@ config = DGANConfig(
     apply_example_scaling = True,
     generator_learning_rate=1e-4,
     discriminator_learning_rate=1e-4,
-    epochs=30,
+    epochs=3000,
 )
 
 model = DGAN(config)
@@ -52,7 +52,7 @@ model.save('saved_models/dgan_wrapped.pt')
 
 print('Model has been trained and saved')
 
-num_samples = 10
+num_samples = 1000
 
 # Generate synthetic data
 _, synthetic_scaled = model.generate_numpy(num_samples)

@@ -7,8 +7,9 @@ import pandas as pd
 from tqdm import tqdm
 import os
 import glob
+from math import pi as M_PI
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
 # === Model components ===
 
@@ -38,14 +39,36 @@ class Recovery(nn.Module):
 class Generator(nn.Module):
     def __init__(self, z_dim, hidden_dim, num_layers):
         super().__init__()
+        self.z_dim = z_dim
+        self.hidden_dim = hidden_dim
+        self.num_layers = num_layers
+
         self.lstm = nn.LSTM(z_dim, hidden_dim, num_layers=num_layers, batch_first=True)
         self.linear = nn.Linear(hidden_dim, hidden_dim)
-        self.activation = nn.LeakyReLU() #nn.Sigmoid()
+        self.activation = nn.LeakyReLU()
+
+        self.init_h = nn.Linear(z_dim, hidden_dim * num_layers)
+        self.init_c = nn.Linear(z_dim, hidden_dim * num_layers)
 
     def forward(self, z):
-        out, _ = self.lstm(z)
+        batch_size = z.size(0)
+        device = z.device
+
+        # Use mean of z across time to initialize hidden states
+        z_mean = z.mean(dim=1)  # (batch_size, z_dim)
+
+        h0 = self.init_h(z_mean).view(self.num_layers, batch_size, self.hidden_dim).to(device)
+        c0 = self.init_c(z_mean).view(self.num_layers, batch_size, self.hidden_dim).to(device)
+
+        # Add small noise to initial states here:
+        h0 = h0 + 0.01 * torch.randn_like(h0)
+        c0 = c0 + 0.01 * torch.randn_like(c0)
+
+        out, _ = self.lstm(z, (h0, c0))
         out = self.activation(self.linear(out))
         return out
+
+
 
 class Supervisor(nn.Module):
     def __init__(self, hidden_dim, num_layers):
@@ -190,19 +213,35 @@ class TimeGAN:
 
         pd.DataFrame(logs).to_csv(log_path, index=False)
 
+
     def generate(self, n_samples):
+        output_dir = "synthetic_data/timegan/unwrapped/"
+        os.makedirs(output_dir, exist_ok=True)
+
         self.generator.eval()
         self.supervisor.eval()
         self.recovery.eval()
+
         with torch.no_grad():
-            z = torch.randn(n_samples, self.seq_len, self.z_dim).to(device)
-            e_hat = self.generator(z)
-            h_hat = self.supervisor(e_hat)
-            x_hat = self.recovery(h_hat)
-            return x_hat.cpu().numpy()
+            for idx in range(0, n_samples):
+                z = torch.rand(1, self.seq_len, self.z_dim).to(device) * 2 * M_PI
+                e_hat = self.generator(z)
+                h_hat = self.supervisor(e_hat)
+                x_hat = self.recovery(h_hat)
 
-# === Utility to load your own data ===
+                synthetic_data =  x_hat.cpu().numpy()
 
+                num_samples, seq_len, num_features = synthetic_data.shape
+
+                sample = synthetic_data[0]  # shape (seq_len, num_features)
+                df = pd.DataFrame(sample, columns=[f"theta{j+1}" for j in range(num_features)])
+                filepath = os.path.join(output_dir, f"synthetic_sample_{idx:03d}.csv")
+                df.to_csv(filepath, index=False)
+
+
+
+
+# === Function to load your data ===
 def load_your_data():
     data_dir = "real_data/polar/"
     all_sequences = []
@@ -212,6 +251,7 @@ def load_your_data():
         theta_1 = df['theta1'].values.astype(np.float32)
         theta_2 = df['theta2'].values.astype(np.float32)
         seq = np.stack([theta_1, theta_2], axis=-1)  # shape (seq_len, 2)
+        #seq = np.mod(seq, 2 * np.pi)
         all_sequences.append(seq)
 
     N = 1000  # number of sequences you want to keep
@@ -232,7 +272,7 @@ def load_model():
     model = TimeGAN(feature_dim=feature_dim, hidden_dim = hidden_dim, z_dim = z_dim, num_layers = num_layers, seq_len=seq_len)
 
     # Load weights
-    model.load_state_dict(torch.load("saved_models/timegan_model.pth"))
+    model.load_state_dict(torch.load("saved_models/timegan_model_unwrapped.pth"))
     model.eval()
 
     with torch.no_grad():
@@ -256,33 +296,25 @@ if __name__ == "__main__":
     model = TimeGAN(feature_dim=feature_dim, hidden_dim = hidden_dim, z_dim = z_dim, num_layers = num_layers, seq_len=seq_len)
 
     print("Training embedder...")
-    model.train_embedder(loader, epochs=50, log_path='timegan_loss/embedder_loss.csv')
+    model.train_embedder(loader, epochs=50, log_path='timegan_loss/embedder_loss_unwrapped.csv')
 
     print("Training supervisor...")
-    model.train_supervisor(loader, epochs=50, log_path='timegan_loss/supervisor_loss.csv')
+    model.train_supervisor(loader, epochs=50, log_path='timegan_loss/supervisor_loss_unwrapped.csv')
 
     print("Training adversarial...")
-    model.train_adversarial(loader, epochs=100, log_path='timegan_loss/adversarial_loss.csv')
+    model.train_adversarial(loader, epochs=50, log_path='timegan_loss/adversarial_loss_unwrapped.csv')
+
+    z1 = torch.rand(1, model.seq_len, model.z_dim, device=device) * 2 * M_PI
+    z2 = torch.rand(1, model.seq_len, model.z_dim, device=device) * 2 * M_PI
+
+    x1 = model.recovery(model.supervisor(model.generator(z1)))
+    x2 = model.recovery(model.supervisor(model.generator(z2)))
+
+    print("First step difference:", torch.sum(torch.abs(x1[:,0,:] - x2[:,0,:])).item())
 
 
     print("Generating synthetic data...")
-    synthetic_data = model.generate(100)  # generate 100 sequences
-    print("Synthetic data shape:", synthetic_data.shape)
+    synthetic_data = model.generate(1000) 
 
-    # Save synthetic data
-
-    output_dir = "synthetic_data/timegan/"
-    os.makedirs(output_dir, exist_ok=True)
-
-    num_samples, seq_len, num_features = synthetic_data.shape
-
-    for i in range(num_samples):
-        sample = synthetic_data[i]  # shape (seq_len, num_features)
-        df = pd.DataFrame(sample, columns=[f"theta{j+1}" for j in range(num_features)])
-        filepath = os.path.join(output_dir, f"synthetic_sample_{i:03d}.csv")
-        df.to_csv(filepath, index=False)
-
-
-    
 
 
